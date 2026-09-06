@@ -7,8 +7,17 @@ give the private repo's `setup.sh` a stable, unauthenticated `curl | sh`
 URL:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jessieroman/dev-standard-bootstrap/main/install.sh | sh -s -- /path/to/target-project
+curl -fsSL https://raw.githubusercontent.com/jessieroman/dev-standard-bootstrap/f22735730c7bee77162be3b450747e64580e5cdd/install.sh | sh -s -- /path/to/target-project
 ```
+
+That URL is pinned to a commit SHA, not `main`. `main` is protected
+(`enforce_admins`, no force-push, no deletion, linear history) but a
+SHA pin adds a second, independent guarantee: even a legitimate push
+to `main` can't silently change what an already-shared URL serves.
+Bump the pin (in both this README and `jessieroman/dev-standard`'s own
+README, which links here) whenever `install.sh` intentionally changes
+— get the new SHA with
+`gh api repos/jessieroman/dev-standard-bootstrap/commits/main --jq .sha`.
 
 Anything after `-s --` is forwarded to `setup.sh` unchanged — e.g. add
 `--yes` to skip the checkbox TUI, or `--prefix myproj`.
