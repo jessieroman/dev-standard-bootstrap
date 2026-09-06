@@ -7,7 +7,7 @@ give the private repo's `setup.sh` a stable, unauthenticated `curl | sh`
 URL:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jessieroman/dev-standard-bootstrap/f22735730c7bee77162be3b450747e64580e5cdd/install.sh | sh -s -- /path/to/target-project
+curl -fsSL https://raw.githubusercontent.com/jessieroman/dev-standard-bootstrap/f22735730c7bee77162be3b450747e64580e5cdd/install.sh | sh
 ```
 
 That URL is pinned to a commit SHA, not `main`. `main` is protected
