@@ -7,7 +7,7 @@ give the private repo's `setup.sh` a stable, unauthenticated `curl | sh`
 URL:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jessieroman/dev-standard-bootstrap/f22735730c7bee77162be3b450747e64580e5cdd/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/jessieroman/dev-standard-bootstrap/596dd2e511b979e83e1288de0c3b280db35ba5e5/install.sh | sh
 ```
 
 That URL is pinned to a commit SHA, not `main`. `main` is protected
@@ -18,6 +18,12 @@ Bump the pin (in both this README and `jessieroman/dev-standard`'s own
 README, which links here) whenever `install.sh` intentionally changes
 — get the new SHA with
 `gh api repos/jessieroman/dev-standard-bootstrap/commits/main --jq .sha`.
+
+The clone is pinned the same way: `install.sh` checks out one exact
+revision of `jessieroman/dev-standard` and refuses to exec `setup.sh`
+when `git rev-parse HEAD` disagrees. Override that revision with
+`DEV_STANDARDS_REF`. Bump the default in `install.sh` when
+`dev-standard` releases.
 
 Anything after `-s --` is forwarded to `setup.sh` unchanged — e.g. add
 `--yes` to skip the checkbox TUI, or `--prefix myproj`.
