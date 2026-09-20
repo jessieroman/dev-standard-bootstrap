@@ -22,7 +22,7 @@ set -eu
 
 repo_url="${DEV_STANDARDS_REPO_URL:-git@github.com:jessieroman/dev-standard.git}"
 dest="${DEV_STANDARDS_DIR:-$HOME/git/dev-standards}"
-ref="${DEV_STANDARDS_REF:-22f2be0bc2d7a9c0e55440d0ee3590a576647f3e}"
+ref="${DEV_STANDARDS_REF:-0097041802286b4034e686373d3cdbb0949f6526}"
 
 log() { printf '\033[1;32m==>\033[0m %s\n' "$1"; }
 die() { printf '\033[1;33m!!\033[0m %s\n' "$1" >&2; exit 1; }
