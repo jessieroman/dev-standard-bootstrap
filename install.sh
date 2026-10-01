@@ -50,5 +50,5 @@ git -C "$dest" checkout --quiet --detach "$ref^{commit}" ||
   die "install.sh: cannot check out $ref"
 
 log "handing off to $dest/setup.sh"
-cd "$dest"
-exec ./setup.sh "$@"
+# No cd: setup.sh targets the caller's directory by default.
+exec "$dest/setup.sh" "$@"
