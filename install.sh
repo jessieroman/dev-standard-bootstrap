@@ -11,18 +11,17 @@
 # actual install decision (which use_* toggles, the TUI, copier) lives
 # there and can change freely without ever touching this URL or this file.
 #
-# The revision is pinned to a full commit SHA and verified after checkout,
-# so this script always runs code someone reviewed, even if the repo's
-# branches move. Override with DEV_STANDARDS_REF=<commit-ish> to install a
-# different revision; the pin is still checked against what git landed on.
+# install.sh checks out the newest v* release tag, so this file never needs
+# a bump when dev-standard releases. Override with DEV_STANDARDS_REF=<tag or
+# commit> to install a different revision.
 #
-# Needs this machine's SSH key already added to GitHub (git clone auth).
-# No GitHub token/PAT needed -- this repo is public.
+# Needs this machine's SSH key already added to GitHub with read access to
+# the private dev-standard repo. No GitHub token/PAT needed.
 set -eu
 
 repo_url="${DEV_STANDARDS_REPO_URL:-git@github.com:jessieroman/dev-standard.git}"
 dest="${DEV_STANDARDS_DIR:-$HOME/git/dev-standards}"
-ref="${DEV_STANDARDS_REF:-308139f1a93020eaf3be3a4a822f97616a05147c}"
+ref="${DEV_STANDARDS_REF:-}"
 
 log() { printf '\033[1;32m==>\033[0m %s\n' "$1"; }
 die() { printf '\033[1;33m!!\033[0m %s\n' "$1" >&2; exit 1; }
@@ -41,11 +40,14 @@ else
   git clone "$repo_url" "$dest"
 fi
 
-log "checking out pinned revision $ref"
-git -C "$dest" fetch --quiet origin "$ref" || true
-git -C "$dest" checkout --quiet --detach "$ref" || true
-got=$(git -C "$dest" rev-parse HEAD)
-[ "$got" = "$ref" ] || die "install.sh: refusing to run unverified code -- wanted revision $ref but $dest is at $got"
+git -C "$dest" fetch --quiet --tags origin
+# ponytail: trusts whoever can push a v* tag to dev-standard; sign tags and
+# run git verify-tag here if anyone besides the owner gets write access.
+[ -n "$ref" ] || ref=$(git -C "$dest" tag -l 'v*' --sort=-v:refname | sed -n 1p)
+[ -n "$ref" ] || die "install.sh: no v* release tag found in $dest"
+log "checking out $ref"
+git -C "$dest" checkout --quiet --detach "$ref^{commit}" ||
+  die "install.sh: cannot check out $ref"
 
 log "handing off to $dest/setup.sh"
 cd "$dest"

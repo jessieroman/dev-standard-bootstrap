@@ -19,11 +19,9 @@ README, which links here) whenever `install.sh` intentionally changes
 — get the new SHA with
 `gh api repos/jessieroman/dev-standard-bootstrap/commits/main --jq .sha`.
 
-The clone is pinned the same way: `install.sh` checks out one exact
-revision of `jessieroman/dev-standard` and refuses to exec `setup.sh`
-when `git rev-parse HEAD` disagrees. Override that revision with
-`DEV_STANDARDS_REF`. Bump the default in `install.sh` when
-`dev-standard` releases.
+The clone follows releases: `install.sh` checks out the newest `v*` tag
+of `jessieroman/dev-standard`, so a `dev-standard` release needs no
+change here. Override that revision with `DEV_STANDARDS_REF`.
 
 Anything after `-s --` is forwarded to `setup.sh` unchanged — e.g. add
 `--yes` to skip the checkbox TUI, or `--prefix myproj`.
@@ -36,9 +34,8 @@ toggles, the Textual checkbox TUI, the copier template itself — lives
 in the private repo and can change freely without ever touching this
 file or its URL.
 
-Requires this machine's SSH key already added to GitHub (same
-prerequisite `git clone git@github.com:...` always has). No GitHub
-token/PAT needed — this repo is public.
+Requires this machine's SSH key already added to GitHub, with read
+access to the private `dev-standard` repo. No GitHub token/PAT needed.
 
 Nothing sensitive lives here on purpose: no secrets, no other
 machine-specific config. Just the pull-and-handoff step.
