@@ -21,8 +21,9 @@ Anything after `-s --` is forwarded to `setup.sh` unchanged — e.g. add
 `--yes` to skip the checkbox TUI, or `--prefix myproj`.
 
 `install.sh` here does exactly one thing: clone or update
-`jessieroman/dev-standard` over SSH into `~/git/dev-standards` (override
-with `DEV_STANDARDS_DIR`/`DEV_STANDARDS_REPO_URL`), then exec that
+`jessieroman/dev-standard` over SSH into `~/.cache/dev-standard`
+(`$XDG_CACHE_HOME` respected; override with
+`DEV_STANDARDS_DIR`/`DEV_STANDARDS_REPO_URL`), then exec that
 repo's own `setup.sh`. Every actual install decision — which `use_*`
 toggles, the Textual checkbox TUI, the copier template itself — lives
 in the private repo and can change freely without ever touching this

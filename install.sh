@@ -20,7 +20,9 @@
 set -eu
 
 repo_url="${DEV_STANDARDS_REPO_URL:-git@github.com:jessieroman/dev-standard.git}"
-dest="${DEV_STANDARDS_DIR:-$HOME/git/dev-standards}"
+# A cache dir, not ~/git/dev-standards: the checkout below detaches HEAD,
+# which would hijack a developer's working clone of the same repo.
+dest="${DEV_STANDARDS_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/dev-standard}"
 ref="${DEV_STANDARDS_REF:-}"
 
 log() { printf '\033[1;32m==>\033[0m %s\n' "$1"; }
