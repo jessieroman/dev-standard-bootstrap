@@ -1,0 +1,3 @@
+# issues.jsonl is a derived bd export: union keeps both sides' lines, no conflict, no per-clone config.
+# A merge may briefly hold two lines for one id; the pre-commit `bd export` rewrites it from the DB.
+.beads/issues.jsonl merge=union

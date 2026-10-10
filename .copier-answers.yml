@@ -1,0 +1,10 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.14.1
+_src_path: /home/romanja/git/dev-standards
+bead_prefix: dev-standard-bootstrap
+use_ansible: false
+use_docker: false
+use_kubernetes: false
+use_python: false
+use_terraform: false
+use_typescript: false

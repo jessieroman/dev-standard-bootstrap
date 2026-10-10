@@ -1,0 +1,85 @@
+---
+name: standards-ci
+"on":
+  pull_request: {}
+  push:
+    branches: [main]
+
+# Every third-party tool this workflow needs is installed by
+# scripts/ci-install-tools.sh, which carries the version pins, the
+# verified-download helper and the supply-chain policy behind both.
+# That script is deliberately forge-neutral, so GitLab CI or
+# Gitea/Forgejo Actions can run the identical installs; this file only
+# adapts its output to GitHub's PATH mechanism. Action refs below are
+# pinned to commit SHAs for the same reason the tool assets are: a tag
+# is mutable.
+
+# Least privilege: every job here only reads the tree. None writes to
+# the repo, comments on a PR, or publishes, so the default repository
+# token scope is wider than anything this workflow needs.
+permissions:
+  contents: read
+
+jobs:
+  lefthook-checks:
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout pinned to a commit SHA (v7.0.1); a tag is
+      # mutable. fetch-depth 1 is deliberate and sufficient: in
+      # `all` mode the checks read the working tree (`git ls-files`,
+      # `gitleaks dir .`), never commit history.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+
+      # Fails closed on a non-x86_64 runner: every tool install pins a
+      # linux x86_64 asset name. See the supply-chain policy comment in
+      # scripts/ci-install-tools.sh.
+      - name: Assert runner architecture
+        run: bash scripts/ci-assert-arch.sh
+
+      # The installer prints its bin directory as its last stdout line
+      # (progress goes to stderr) and decides for itself which tools
+      # this repo needs, from the same file tests the checks gate on.
+      - name: Install standards tooling
+        run: |
+          set -euo pipefail
+          bin=$(bash scripts/ci-install-tools.sh | tail -n 1)
+          echo "$bin" >> "$GITHUB_PATH"
+
+      - name: Validate lefthook config
+        run: lefthook validate
+
+      # `lefthook run pre-commit --all-files` was a no-op here: the
+      # checks derive their own file list from the git index, which is
+      # empty after a fresh checkout, and lefthook's --all-files only
+      # affects lefthook's own {staged_files} templating. Call the
+      # script directly in `all` mode so it walks the whole tree.
+      - name: Run standards checks against the whole tree
+        run: bash scripts/pre-commit-checks.sh all
+
+  commit-message-checks:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      # v7.0.1; needs full history to walk every commit in the PR.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          # Head, not GitHub's synthetic "Merge X into Y" commit, which
+          # no author wrote and which carries no Refs: trailer.
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Install standards tooling
+        run: |
+          set -euo pipefail
+          bin=$(bash scripts/ci-install-tools.sh | tail -n 1)
+          echo "$bin" >> "$GITHUB_PATH"
+      - name: Validate every commit in this PR
+        # base_ref goes through env, not `${{ }}`: an env value reaches
+        # the process environment instead of the script text, so a
+        # fork's branch name can never become shell syntax.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          bash scripts/ci-check-commit-messages.sh \
+            "origin/$BASE_REF..HEAD"
