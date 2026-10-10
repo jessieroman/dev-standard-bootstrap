@@ -1,0 +1,16 @@
+---
+extends: existence
+message: "Delete filler '%s'."
+level: error
+ignorecase: true
+tokens:
+  - simply
+  - basically
+  - essentially
+  - in order to
+  - note that
+  - it is important to note
+  - it's worth noting
+  - please note
+  - needless to say
+  - as mentioned

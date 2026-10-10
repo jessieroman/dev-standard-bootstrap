@@ -1,0 +1,19 @@
+---
+# Relaxed yamllint baseline seeded by dev-standards; the project owns
+# this file after the first copy (_skip_if_exists). yamllint runs on
+# every *.yml/*.yaml via scripts/pre-commit-checks.sh, so the defaults
+# here must not flag ordinary CI YAML.
+extends: default
+
+rules:
+  # Upstream default is a hard 80-column error; real workflow files and
+  # long URLs blow past that constantly. Warn at 120 instead.
+  line-length:
+    max: 120
+    level: warning
+  # GitHub/Gitea workflows use a bare `on:` trigger key, which the
+  # default truthy rule rejects.
+  truthy:
+    allowed-values: ["true", "false", "on"]
+  comments:
+    min-spaces-from-content: 1

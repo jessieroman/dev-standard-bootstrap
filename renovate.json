@@ -1,0 +1,41 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "Pin-bump automation for this project. This file is CONFIGURATION ONLY and is deliberately forge-agnostic: it contains no platform, token, endpoint, onboarding or autodiscover key, because those are self-hosted runner-side options and are not valid in repository config.",
+    "Renovate reads this same file unchanged on GitHub, GitLab, Gitea and Forgejo. EXECUTION is the forge-specific half and lives outside this file: run the `renovate` CLI or ghcr.io/renovatebot/renovate on a schedule in whichever forge hosts this repo, supplying RENOVATE_PLATFORM/RENOVATE_TOKEN/RENOVATE_ENDPOINT there. Without such a runner this config is inert but harmless.",
+    "helpers:pinGitHubActionDigests keeps the commit-SHA action pins in .github/workflows/ci.yml updated while preserving their version comments; it also applies to .gitea/ and .forgejo/ workflow directories.",
+    "The regex manager bumps the tool pins in scripts/ci-install-tools.sh: a `# renovate:` annotation, a `NAME_VERSION` default and, where present, the `NAME_SHA256` default on the next line. Version and digest move in one PR. github-release-attachments resolves the new digest from the vendor's checksum file, or by hashing release assets when there is none; it looks releases up by exact tag, so pins keep the upstream `v`. custom.helm reads the digest from Helm's release notes, because Helm serves its tarballs from get.helm.sh. scripts/check-pinned-urls.sh fails the build if a pin lacks its annotation.",
+    "The pip-compile manager reads the `uv pip compile` command from each scripts/ci-requirements/*.txt header, bumps the top-level pin in the matching *.in file and re-locks every transitive dependency with hashes. Its default lockFileMaintenance refreshes transitive versions weekly.",
+    "commitBody gives every Renovate commit the Refs: trailer that scripts/ci-check-commit-messages.sh requires; dev-standards-t8u is the standing bead for automated pin updates."
+  ],
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "commitBody": "Refs: dev-standards-t8u",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Tool pins and their SHA-256 digests declared as shell env defaults in the CI installer",
+      "managerFilePatterns": [
+        "/^scripts/ci-install-tools\\.sh$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z.-]+) depName=(?<depName>\\S+)\\s+[A-Z_]+_VERSION=\"\\$\\{[A-Z_]+_VERSION:-(?<currentValue>[^}\"]+)\\}\"(?:\\s+[A-Z_]+_SHA256=\"\\$\\{[A-Z_]+_SHA256:-(?<currentDigest>[0-9a-f]{64})\\}\")?"
+      ]
+    }
+  ],
+  "customDatasources": {
+    "helm": {
+      "defaultRegistryUrlTemplate": "https://api.github.com/repos/helm/helm/releases?per_page=100",
+      "transformTemplates": [
+        "{\"releases\": [$.{\"version\": tag_name, \"isStable\": $not(prerelease), \"releaseTimestamp\": published_at, \"digest\": $match(body, /Linux amd64.*?([0-9a-f]{64})/, 1).groups[0]}], \"sourceUrl\": \"https://github.com/helm/helm\"}"
+      ]
+    }
+  },
+  "pip-compile": {
+    "managerFilePatterns": [
+      "/^scripts/ci-requirements/[^/]+\\.txt$/"
+    ]
+  }
+}

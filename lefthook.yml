@@ -1,0 +1,36 @@
+---
+# Project-local git hooks (evilmartians/lefthook) — checked into this repo.
+# `lefthook install` after cloning wires them for this repo only; there is
+# no personal global hooksPath anywhere in this template on purpose (a
+# global hook is invisible to every other clone and actively conflicts
+# with any repo defining its own local hooks).
+# A project adds its own jobs in lefthook-project.yml, never here: this
+# file is template payload, so an edit conflicts on every copier update.
+# lefthook skips a missing extends file.
+extends:
+  - lefthook-project.yml
+
+pre-commit:
+  jobs:
+    - name: standards-checks
+      run: bash scripts/pre-commit-checks.sh
+
+    # Reports the day a consumer's payload file (lefthook.yml, cliff.toml,
+    # pyproject.toml, ...) stops matching what this template would
+    # generate. Skips instead of failing when copier or the answers file
+    # is absent — see scripts/check-template-drift.sh.
+    - name: template-drift
+      run: bash scripts/check-template-drift.sh
+
+    # The Dolt db is bd-only and gitignored; this keeps the tool-free copy
+    # in .beads/issues.jsonl current, inside the commit being made.
+    # `stage_fixed` is not enough: it re-stages files the job touched that
+    # were ALREADY staged, and a bd write usually happens with the export
+    # untouched, so the job stages it itself.
+    - name: beads-export
+      run: bash scripts/export-beads.sh
+
+commit-msg:
+  jobs:
+    - name: standards-checks
+      run: bash scripts/commit-msg-checks.sh {1}

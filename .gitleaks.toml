@@ -1,0 +1,17 @@
+# gitleaks config: default ruleset plus one narrow allowlist.
+#
+# .beads/issues.jsonl is the plain-text export of the issue tracker
+# (scripts/export-beads.sh). It is long-form prose, so the low-confidence
+# `generic-api-key` entropy rule fires on ordinary text -- the first hit was
+# the memory key "chezmoi-promptbool-vs-promptbooolonce-2026-09".
+#
+# Only that one rule is relaxed, and only for that one file: every
+# high-confidence rule (AWS keys, GitHub tokens, private keys, ...) still
+# scans the export, so a real credential written into a bead is still caught.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+[rules.allowlist]
+paths = ['''^\.beads/issues\.jsonl$''']
